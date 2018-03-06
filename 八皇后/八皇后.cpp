@@ -1,127 +1,70 @@
 #include <stdio.h>
+#include <stdbool.h> 
+#define BOARDSIZE 8
+ 
+int chess[BOARDSIZE][BOARDSIZE];
+int n;													
 
-int count = 0;
-
-int check( int row, int j, int (*chess)[8] )
-{
-	int i, k, flag1=0, flag2=0, flag3=0, flag4=0, flag5=0;
-
-	// 判断是否合法 
-	for( i=0; i < 8; i++ )
-	{
-		if( *(*(chess+i)+j) != 0 )
-		{
-			flag1 = 1;
-			break;
-		}
-	}
-
-	//判断左上方 
-	for( i=row, k=j; i>=0 && k>=0; i--, k-- )
-	{
-		if( *(*(chess+i)+k) != 0 )
-		{
-			flag2 = 1;
-			break;
-		}
-	}
-
-	//判断右下方 
-	for( i=row, k=j; i<8 && k<8; i++, k++ )
-	{
-		if( *(*(chess+i)+k) != 0 )
-		{
-			flag3 = 1;
-			break;
-		}
-	}
-
-	//判断右上方 
-	for( i=row, k=j; i>=0 && k<8; i--, k++ )
-	{
-		if( *(*(chess+i)+k) != 0 )
-		{
-			flag4 = 1;
-			break;
-		}
-	}
-
-	//判断左下方 
-	for( i=row, k=j; i<8 && k>=0; i++, k-- )
-	{
-		if( *(*(chess+i)+k) != 0 )
-		{
-			flag5 = 1;
-			break;
-		}
-	}
-
-	if( flag1 || flag2 || flag3 || flag4 || flag5 )
-		return 0;
-	else
-		return 1;
+/* 打印棋盘 */
+void PrintQueen(){
+    int row, column; 
+    
+	n++;
+    printf("第%d种解决方案:\n", n);
+    for(row = 0; row < 8; row++){
+        for(column = 0; column < 8; column++){
+            chess[row][column]? printf("1 "):printf("0 ");
+        }
+        printf("\n");
+    }
+    printf("\n");
 }
 
-//raw表示起始行
-//col表示起始列
-//(*chess)[8]表示指向棋盘每一行的指针 
-void eight_queen( int row, int n, int (*chess)[8] )
-{
-	int temp[8][8];	//临时棋盘(存放不同解法) 
-	int i, j;
-
-	for( i=0; i < 8; i++ )
-	{
-		for( j=0; j < 8; j++ )
-		{
-			temp[i][j] = chess[i][j];
-		}
-	}
-
-	if( 8 == row )
-	{
-		printf("第 %d 种解法\n", count+1);
-		for( i=0; i < 8; i++ )
-		{
-			for( j=0; j < 8; j++ )
-				printf("%d ", *(*(temp+i)+j));
-			printf("\n");
-		}
-		printf("\n");
-		count++;
-	}
-	else	
-	{
-		for( j=0; j < n; j++ )
-		{
-			if( check( row, j, chess ) ) 
-			{
-				for( i=0; i < 8; i++ )
-				{
-					*(*(temp+row)+i) = 0;
-				}
-				
-				*(*(temp+row)+j) = 1;
-
-				eight_queen( row+1, n, temp );
-			}
-		}
-	}
+/* 判断是否有效 */ 
+bool is_valid(int row, int column){
+    int i;											/* 坐标变换 */
+    
+    for (i = 1; i < 8; i++){
+        /* 上 */
+        if ((row-i)>=0 && chess[row-i][column])
+			return false;
+			
+        /* 左 */
+        if ((column-i)>=0 && chess[row][column-i])
+			return false;
+ 
+        /* 右 */
+        if ((column+i)<8 && chess[row][column+i])
+			return false;
+ 
+        /* 斜左上方 */
+        if((column-i)>=0 && (row-i>)=0 && chess[row-i][column-i])
+			return false;
+ 
+        /* 斜右上方 */
+        if((column+i)<8 && (row-i)>=0 && chess[row-i][column+i])
+			return false;
+    }
+    return true;
 }
 
-int main(void)
+/* 解决方案 */
+void Queen(int row)
 {
-	int chess[8][8], i, j;
-
-	for( i=0; i < 8; i++ )	//初始化棋盘 
-	{
-		for( j = 0; j < 8; j++ )
-			chess[i][j] = 0;
-	}
-
-	eight_queen( 0, 8, chess );
-
-	printf("总共有 %d 种解决方法\n\n", count);
-
-	return 0;
+    int column;
+    for(column = 0; column <= 7; column++){
+    	chess[row][column] = 1;						/* 棋盘全部初始化为1 */
+        if (row == 0 || is_valid(row, column)){   	/* 当前位置合法 */
+            if (row < 7)						
+               Queen(row + 1);						/* 递归 */ 
+            else
+               PrintQueen();
+        }
+       	chess[row][column] = 0;	 					/* 没有棋子的部分置为0 */ 
+    }
+}
+ 
+int main(void){
+    Queen(0);
+    return 0;
 }
